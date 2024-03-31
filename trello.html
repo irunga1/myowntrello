@@ -125,8 +125,24 @@
             float: right;
             transition: background-color 0.3s ease-in-out;
         }
+        .itemMove {
+            display: inline-block;
+            background-color: rgb(77, 255, 7);
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            width: 20px;
+            text-align: center;
+            border-radius: 5px;
+            float: right;
+            transition: background-color 0.3s ease-in-out;
+            margin-left:5px;
+        }
         .itemRemove:hover {
             background-color: #d90000; /* Cambio de color al hacer hover */
+        }
+        .itemMove:hover {
+            background-color: green; /* Cambio de color al hacer hover */
         }
     </style>
 </head>
@@ -230,7 +246,27 @@
                 itemList.innerHTML = "";
                 let cont1 = 0;
                 lItemArray.forEach(item => {
-                    itemList.innerHTML += `<li id="itemRemove_${cont1}">${item} <span class="itemRemove" item="${pos}" subitem="${cont1}"> - </span> </li>`;
+                    if((pos >=0)){
+                        let largo = document.querySelectorAll(".list");
+
+                        if((pos >0) && (pos < largo.length -1)){
+                            itemList.innerHTML += `<li id="itemRemove_${cont1}">${item} <span class="itemMove itemMoveRight" item="${pos}" subitem="${cont1}"> > </span> <span class="itemMove itemMoveLeft" item="${pos}" subitem="${cont1}"> < </span>   <span class="itemRemove" item="${pos}" subitem="${cont1}"> - </span> </li>`;
+                        }
+                        else{
+                            if(pos == 0){
+                                itemList.innerHTML += `<li id="itemRemove_${cont1}">${item} <span class="itemMove itemMoveRight" item="${pos}" subitem="${cont1}"> > </span> <span class="itemRemove" item="${pos}" subitem="${cont1}"> - </span> </li>`;
+                            }
+                            else{
+                                itemList.innerHTML += `<li id="itemRemove_${cont1}">${item} <span class="itemMove itemMoveLeft " item="${pos}" subitem="${cont1}"> < </span> <span class="itemRemove" item="${pos}" subitem="${cont1}"> - </span> </li>`;
+                            }
+                            
+                        }
+                        
+                    }
+                    else{
+                        itemList.innerHTML += `<li id="itemRemove_${cont1}">${item}  <span class="itemRemove" item="${pos}" subitem="${cont1}"> - </span> </li>`;
+                    }
+                    
                     cont1++;
                     this.removeItem();
                 });
@@ -273,6 +309,8 @@
                     });
                 });
             }
+            
+
         }
 
         let Obj = new Cards();
