@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Own Trello</title>
+    <style>
+        body {
+            background-color: #0079bf; /* Azul */
+            font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 10px; /* Agregado padding */
+        }
+        h1 {
+            text-align: center;
+            margin-top: 20px;
+            color: white;
+            background-color: black;
+            padding-top: 10px;
+            padding-bottom: 10px;
+            opacity: 0.5;
+        }
+        .board {
+            display: flex;
+            flex-wrap: wrap;
+            padding: 10px;
+            justify-content: center;
+        }
+        .list {
+            margin: 10px;
+            padding: 10px;
+            background-color: #f4f4f4;
+            border-radius: 5px;
+            min-width: 200px;
+            max-width: 300px;
+            flex-grow: 1;
+            box-sizing: border-box;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1); /* Agregada sombra */
+            transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+        }
+        .list:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        .list ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+        .list ul li {
+            margin-bottom: 5px;
+            background-color: #fff;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            padding: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease-in-out;
+        }
+        .list ul li:hover {
+            background-color: #f0f0f0;
+        }
+        #addButton {
+            display: inline-block;
+            background-color: #026aa7; /* Azul oscuro */
+            color: #fff; /* Texto blanco */
+            text-align: center;
+            border: 1px solid #026aa7; /* Borde igual al color de fondo para mantener el tamaño */
+            padding: 5px 10px; /* Ajuste de padding */
+            cursor: pointer;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2); /* Agregada sombra */
+            border-radius: 3px; /* Bordes redondeados */
+            transition: background-color 0.3s ease-in-out, transform 0.3s ease-in-out;
+        }
+        #addButton:hover {
+            background-color: #025185; /* Cambio de color al hacer hover */
+            transform: translateY(-2px); /* Efecto de levantamiento */
+        }
+        .addItem {
+            display: inline-block;
+            background-color: #026aa7; /* Azul oscuro */
+            color: #fff; /* Texto blanco */
+            text-align: center;
+            border: 1px solid #026aa7; /* Borde igual al color de fondo para mantener el tamaño */
+            padding: 5px 10px; /* Ajuste de padding */
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2); /* Agregada sombra */
+            border-radius: 3px; /* Bordes redondeados */
+            transition: background-color 0.3s ease-in-out, transform 0.3s ease-in-out;
+        }
+        .addItem:hover {
+            background-color: #025185; /* Cambio de color al hacer hover */
+            transform: translateY(-2px); /* Efecto de levantamiento */
+        }
+        .removeItem {
+            display: inline-block;
+            background-color: #e64141;
+            color: #fff;
+            text-align: center;
+            border: 1px solid #026aa7;
+            padding: 5px 10px;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            border-radius: 3px;
+            transition: background-color 0.3s ease-in-out, transform 0.3s ease-in-out;
+        }
+        .removeItem:hover {
+            background-color: #d13131; /* Cambio de color al hacer hover */
+            transform: translateY(-2px); /* Efecto de levantamiento */
+        }
+        input[type="text"] {
+            width: calc(100% - 34px); /* Teniendo en cuenta el tamaño del botón + padding */
+            padding: 5px;
+            margin-bottom: 10px;
+        }
+        .itemRemove {
+            display: inline-block;
+            background-color: red;
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            width: 20px;
+            text-align: center;
+            border-radius: 5px;
+            float: right;
+            transition: background-color 0.3s ease-in-out;
+        }
+        .itemRemove:hover {
+            background-color: #d90000; /* Cambio de color al hacer hover */
+        }
+    </style>
+</head>
+<body>
+    <h1>My Own Board</h1>
+    <input type="text" id="card" placeholder="Add Card Title"><button id="addButton">+</button> <!-- Se cambió el span por un botón -->
+    <div class="board" id="board">
+        <!-- Lists will be added here -->
+    </div>
+
+    <script>
+        class Cards {
+            constructor(firstProp = null) {
+                this.firstProp = firstProp;
+                this.cardArray = [];
+            }
+
+            createCard = (btn = "addButton") => {
+                let aBtn = document.getElementById(btn);
+                aBtn.addEventListener("click", () => {
+                    let info = document.getElementById("card").value;
+                    if (info.length > 2) {
+                        this.cardArray = JSON.parse(localStorage.getItem("cards"));
+                        this.cardArray = (this.cardArray == null)?[]:this.cardArray;
+                        this.cardArray.push(info);
+                        localStorage.setItem("cards", JSON.stringify(this.cardArray));
+                        this.createCardItem();
+                        this.renderCard();
+                    }
+                    document.getElementById("card").value = "";
+                    document.getElementById("card").value = "";
+                });
+            }
+
+            createCardItem = () => {
+                if (localStorage.getItem("cards")) {
+                    let arrCard = JSON.parse(localStorage.getItem("cards"));
+                    for (let i = 0; i < arrCard.length; i++) {
+                        let exist = localStorage.getItem(`i_${i}`)
+                        console.log(exist);
+                        if(exist == null){
+                            localStorage.setItem(`i_${i}`, "[]");
+                        }
+                        
+                    }
+                }
+            }
+
+            renderCard = () => {
+                let str = "";
+                let arrCard = JSON.parse(localStorage.getItem("cards"));
+                let cont = 0;
+                arrCard.forEach((el) => {
+                    str += `
+                    <div class="list" item=${cont} id = "i_${cont}">
+                        <h3>${el}</h3>
+                        <div class="itemListContainer" item="">
+                            <ul id="itemList_${cont}">
+                                <!-- Items will be added here -->
+                            </ul>
+                        </div>
+                        <input type="text" placeholder="Add Item" id="addItemText_${cont}" />
+                        <button class="addItem addItem_${cont}" item="${cont}">+</button> <!-- Se cambió el span por un botón -->
+                        <button class="removeItem removeItem_${cont}" item="${cont}">-</button>
+                    </div>
+                    `;
+                    cont++;
+                });
+                document.getElementById("board").innerHTML = str;
+                this.addItem();
+                this.renderItems(); // Llamar a renderItems después de renderizar las tarjetas
+                this.clearCard();
+            }
+
+            addItem = () => {
+                let adds = document.querySelectorAll(".addItem");
+                adds.forEach((el) => {
+                    el.addEventListener("click", (event) => {
+                        let pos = event.target.getAttribute("item");
+                        let strItem = document.getElementById(`addItemText_${pos}`).value;
+                        if(strItem.length >2){
+                            let lpos = "i_" + pos;
+                            let lItem = localStorage.getItem(lpos);
+                            let lItem2 = JSON.parse(lItem);
+                            lItem2.push(strItem);
+                            localStorage.setItem(lpos, JSON.stringify(lItem2));
+                            this.renderItem(pos);
+                            
+                        }
+                        document.getElementById(`addItemText_${pos}`).value = "";
+
+                    });
+                });
+            }
+
+            renderItem = (pos) => {
+                let itemList = document.getElementById(`itemList_${pos}`);
+                let lpos = "i_" + pos;
+                let lItem = localStorage.getItem(lpos);
+                let lItemArray = JSON.parse(lItem);
+                itemList.innerHTML = "";
+                let cont1 = 0;
+                lItemArray.forEach(item => {
+                    itemList.innerHTML += `<li id="itemRemove_${cont1}">${item} <span class="itemRemove" item="${pos}" subitem="${cont1}"> - </span> </li>`;
+                    cont1++;
+                    this.removeItem();
+                });
+                
+            }
+
+            renderItems = () => {
+                let arrCard = JSON.parse(localStorage.getItem("cards"));
+                for (let i = 0; i < arrCard.length; i++) {
+                    this.renderItem(i);
+                }
+            }
+            clearCard =()=>{
+                let clrBtn = document.querySelectorAll(".removeItem");
+                clrBtn.forEach((el)=>{
+                    el.addEventListener("click",(event)=>{
+                        let pos = event.target.getAttribute("item");
+                        let lpos = "i_" + pos;
+                        localStorage.setItem(lpos,"[]");
+                        document.getElementById(`itemList_${pos}`).innerHTML = ""
+                    });
+                })
+            }
+            removeItem =()=>{
+                let rmIt = document.querySelectorAll(".itemRemove");
+                rmIt.forEach((el)=>{
+                    el.addEventListener("click",(event)=>{
+                        let pos1 = event.target.getAttribute("item");
+                        let pos2 = event.target.getAttribute("subitem");
+                        let lpos = "i_" + pos1;
+                        let itemList1 = localStorage.getItem(lpos);
+                        itemList1 = JSON.parse(itemList1);
+                        itemList1.splice(pos2);
+                        localStorage.setItem(lpos,JSON.stringify(itemList1));
+                        // alert(lpos);
+                        console.log(itemList1);
+                        
+                        document.getElementById(`itemRemove_${pos2}`).remove();
+                        // this.renderItem();
+                    });
+                });
+            }
+        }
+
+        let Obj = new Cards();
+        Obj.createCard();
+        Obj.renderCard();
+        Obj.createCardItem();
+    </script>
+</body>
+
+</html>
